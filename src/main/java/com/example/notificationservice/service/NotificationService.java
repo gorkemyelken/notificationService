@@ -11,40 +11,34 @@ import java.util.List;
 
 @Service
 public class NotificationService {
+
     @Autowired
-    private NotificationTemplateRepository templateRepository;
+    private NotificationTemplateRepository notificationTemplateRepository;
 
     @Autowired
     private TargetPatientRepository targetPatientRepository;
 
     public NotificationTemplate createTemplate(NotificationTemplate template) {
-        return templateRepository.save(template);
+        return notificationTemplateRepository.save(template);
     }
 
     public List<NotificationTemplate> getAllTemplates() {
-        return templateRepository.findAll();
+        return notificationTemplateRepository.findAll();
     }
 
-    public void evaluateNewPatient(Long patientId, String gender, int age) {
-        System.out.println("asdsadqwdqw");
-        List<NotificationTemplate> templates = templateRepository.findAll();
+    public void evaluatePatientForNotifications(Long patientId, String gender, int age) {
+        List<NotificationTemplate> templates = notificationTemplateRepository.findAll();
+
         for (NotificationTemplate template : templates) {
-            if ((template.getGenderCriteria() == null || template.getGenderCriteria().equalsIgnoreCase(gender)) &&
-                    (template.getAgeCriteria() == null || evaluateAgeCriteria(template.getAgeCriteria(), age))) {
-                TargetPatient target = new TargetPatient();
-                target.setPatientId(patientId);
-                target.setTemplateId(template.getId());
-                targetPatientRepository.save(target);
+            if ((template.getGender() == null || template.getGender().equals(gender)) &&
+                    (template.getMinAge() == null || age >= template.getMinAge()) &&
+                    (template.getMaxAge() == null || age <= template.getMaxAge())) {
+
+                TargetPatient targetPatient = new TargetPatient();
+                targetPatient.setPatientId(patientId);
+                targetPatient.setTemplateId(template.getId());
+                targetPatientRepository.save(targetPatient);
             }
         }
-    }
-
-    private boolean evaluateAgeCriteria(String criteria, int age) {
-
-        if (criteria.startsWith("age>")) {
-            int ageLimit = Integer.parseInt(criteria.substring(4));
-            return age > ageLimit;
-        }
-        return false;
     }
 }

@@ -9,11 +9,10 @@ import lombok.Data;
 @Entity
 @Data
 public class TargetPatient {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private Long patientId;
     private Long templateId;
-    private Boolean notificationSent = false;
 }
